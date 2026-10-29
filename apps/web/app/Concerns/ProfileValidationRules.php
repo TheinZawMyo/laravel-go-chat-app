@@ -17,7 +17,10 @@ trait ProfileValidationRules
     {
         return [
             'name' => $this->nameRules(),
+            'username' => $this->usernameRules($userId),
             'email' => $this->emailRules($userId),
+            'bio' => ['nullable', 'string', 'max:500'],
+            'status_text' => ['nullable', 'string', 'max:100'],
         ];
     }
 
@@ -29,6 +32,25 @@ trait ProfileValidationRules
     protected function nameRules(): array
     {
         return ['required', 'string', 'max:255'];
+    }
+
+    /**
+     * Get the validation rules used to validate usernames.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function usernameRules(int|string|null $userId = null): array
+    {
+        return [
+            'required',
+            'string',
+            'min:3',
+            'max:30',
+            'alpha_dash:ascii',
+            $userId === null
+                ? Rule::unique(User::class)
+                : Rule::unique(User::class)->ignore($userId),
+        ];
     }
 
     /**

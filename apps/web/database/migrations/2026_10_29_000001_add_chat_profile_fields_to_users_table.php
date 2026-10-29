@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('username')->nullable()->unique();
+            $table->string('username')->unique();
             $table->string('avatar_key')->nullable();
             $table->text('bio')->nullable();
             $table->string('status_text')->nullable();

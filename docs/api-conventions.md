@@ -76,3 +76,24 @@ Rules:
 - Clients reconnect with exponential backoff and jitter.
 - Subscriptions are reauthorized after reconnect and membership changes.
 - Clients recover missed messages through the Laravel API from their last confirmed `seq`.
+
+## Authorization conventions
+
+- Every controller action that touches a user-owned resource authorizes through a policy (`Gate::authorize` / `$this->authorize`).
+- Policies live in `apps/web/app/Policies` and are auto-discovered for their models.
+- `UserPolicy` allows authenticated users to view profiles, and only the owner to update or delete the account.
+- `UserDevicePolicy` restricts device listing and revocation to the owning user.
+- Form Requests own validation; controllers never trust raw request input.
+- Inactive accounts are rejected during password login and logged out by `EnsureAccountIsActive`.
+- Authenticated requests update `last_seen_at` at most once per minute.
+
+## Phase 1 endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/v1/me` | Current user profile |
+| GET | `/api/v1/users/{username}` | Public profile lookup by username |
+| GET | `/api/v1/devices` | List the current user's devices |
+| DELETE | `/api/v1/devices/{id}` | Revoke a device |
+
+Usernames are unique, 3-30 characters, ASCII letters/numbers/dashes/underscores, and stored lowercase.

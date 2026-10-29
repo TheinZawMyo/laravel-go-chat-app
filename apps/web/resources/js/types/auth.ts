@@ -1,13 +1,18 @@
+export type AccountStatus = 'active' | 'suspended' | 'deactivated';
+
 export type User = {
-    id: number;
+    id: string;
     name: string;
+    username: string;
     email: string;
-    avatar?: string;
+    avatar_url: string | null;
+    bio: string | null;
+    status_text: string | null;
+    status: AccountStatus;
     email_verified_at: string | null;
-    two_factor_enabled?: boolean;
+    last_seen_at: string | null;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown;
 };
 
 export type Auth = {

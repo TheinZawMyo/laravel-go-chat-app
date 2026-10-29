@@ -9,6 +9,7 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
@@ -36,7 +37,7 @@ const user = computed(() => page.props.auth.user);
         <Heading
             variant="small"
             title="Profile"
-            description="Update your name and email address"
+            description="Update your name, username, and public profile"
         />
 
         <Form
@@ -59,6 +60,24 @@ const user = computed(() => page.props.auth.user);
             </div>
 
             <div class="grid gap-2">
+                <Label for="username">Username</Label>
+                <Input
+                    id="username"
+                    class="mt-1 block w-full"
+                    name="username"
+                    :default-value="user.username"
+                    required
+                    autocomplete="username"
+                    placeholder="your_username"
+                />
+                <p class="text-xs text-muted-foreground">
+                    3-30 characters. Lowercase letters, numbers, dashes, and
+                    underscores.
+                </p>
+                <InputError class="mt-2" :message="errors.username" />
+            </div>
+
+            <div class="grid gap-2">
                 <Label for="email">Email address</Label>
                 <Input
                     id="email"
@@ -71,6 +90,34 @@ const user = computed(() => page.props.auth.user);
                     placeholder="Email address"
                 />
                 <InputError class="mt-2" :message="errors.email" />
+            </div>
+
+            <div class="grid gap-2">
+                <Label for="status_text">Status</Label>
+                <Input
+                    id="status_text"
+                    class="mt-1 block w-full"
+                    name="status_text"
+                    :default-value="user.status_text ?? ''"
+                    autocomplete="off"
+                    placeholder="Available"
+                    maxlength="100"
+                />
+                <InputError class="mt-2" :message="errors.status_text" />
+            </div>
+
+            <div class="grid gap-2">
+                <Label for="bio">Bio</Label>
+                <Textarea
+                    id="bio"
+                    class="mt-1 block w-full"
+                    name="bio"
+                    :default-value="user.bio ?? ''"
+                    placeholder="Tell people a little about yourself"
+                    rows="4"
+                    maxlength="500"
+                />
+                <InputError class="mt-2" :message="errors.bio" />
             </div>
 
             <div v-if="page.props.mustVerifyEmail && !user.email_verified_at">

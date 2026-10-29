@@ -29,7 +29,10 @@ class ProfileUpdateTest extends TestCase
             ->actingAs($user)
             ->patch(route('profile.update'), [
                 'name' => 'Test User',
+                'username' => 'new_username',
                 'email' => 'test@example.com',
+                'bio' => 'Hello there.',
+                'status_text' => 'Available',
             ]);
 
         $response
@@ -39,8 +42,53 @@ class ProfileUpdateTest extends TestCase
         $user->refresh();
 
         $this->assertSame('Test User', $user->name);
+        $this->assertSame('new_username', $user->username);
         $this->assertSame('test@example.com', $user->email);
+        $this->assertSame('Hello there.', $user->bio);
+        $this->assertSame('Available', $user->status_text);
         $this->assertNull($user->email_verified_at);
+    }
+
+    public function test_username_is_lowercased_when_updated()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'username' => 'MixedCase',
+                'email' => $user->email,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('mixedcase', $user->refresh()->username);
+    }
+
+    public function test_username_must_be_unique()
+    {
+        User::factory()->create(['username' => 'taken']);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'username' => 'taken',
+                'email' => $user->email,
+            ])
+            ->assertSessionHasErrors('username');
+    }
+
+    public function test_keeping_the_current_username_is_allowed()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'username' => $user->username,
+                'email' => $user->email,
+            ])
+            ->assertSessionHasNoErrors();
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()
@@ -51,6 +99,7 @@ class ProfileUpdateTest extends TestCase
             ->actingAs($user)
             ->patch(route('profile.update'), [
                 'name' => 'Test User',
+                'username' => $user->username,
                 'email' => $user->email,
             ]);
 
