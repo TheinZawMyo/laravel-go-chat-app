@@ -1,0 +1,59 @@
+name: go
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/gateway/**"
+      - "apps/worker/**"
+      - "go.work"
+      - ".github/workflows/go-ci.yml"
+  pull_request:
+    paths:
+      - "apps/gateway/**"
+      - "apps/worker/**"
+      - "go.work"
+      - ".github/workflows/go-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - apps/gateway
+          - apps/worker
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/gateway/go.mod
+          cache-dependency-path: |
+            apps/gateway/go.sum
+            apps/worker/go.sum
+
+      - name: Format check
+        working-directory: ${{ matrix.module }}
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+
+      - name: Vet
+        working-directory: ${{ matrix.module }}
+        run: go vet ./...
+
+      - name: Test
+        working-directory: ${{ matrix.module }}
+        run: go test ./...
+
+      - name: Build
+        working-directory: ${{ matrix.module }}
+        run: go build ./...

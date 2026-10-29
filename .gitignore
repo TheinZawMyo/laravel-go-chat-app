@@ -1,0 +1,17 @@
+.DS_Store
+.data/
+
+.env
+.env.*
+!.env.example
+
+apps/gateway/bin/
+apps/worker/bin/
+apps/gateway/.env
+apps/worker/.env
+
+node_modules/
+vendor/
+.idea/
+.vscode/
+*.log
