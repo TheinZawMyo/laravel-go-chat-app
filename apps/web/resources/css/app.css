@@ -59,6 +59,11 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    --color-chat-accent: var(--chat-accent);
+    --color-chat-canvas: var(--chat-canvas);
+    --color-chat-outgoing: var(--chat-outgoing);
+    --color-chat-outgoing-foreground: var(--chat-outgoing-foreground);
 }
 
 /*
@@ -86,6 +91,21 @@
             'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
             'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
             'Noto Color Emoji';
+    }
+
+    .chat-wallpaper {
+        background-color: var(--chat-canvas);
+        background-image:
+            radial-gradient(
+                ellipse at 50% 0%,
+                color-mix(in srgb, var(--chat-accent) 7%, transparent),
+                transparent 54%
+            ),
+            radial-gradient(
+                color-mix(in srgb, var(--chat-accent) 4%, transparent) 0.8px,
+                transparent 0.8px
+            );
+        background-size: auto, 22px 22px;
     }
 }
 
@@ -124,6 +144,10 @@
     --sidebar-border: hsl(0 0% 91%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(0 0% 98%);
+    --chat-accent: hsl(207 79% 56%);
+    --chat-canvas: hsl(204 28% 97%);
+    --chat-outgoing: hsl(207 90% 93%);
+    --chat-outgoing-foreground: hsl(207 75% 18%);
 }
 
 .dark {
@@ -160,6 +184,10 @@
     --sidebar-border: hsl(0 0% 15.9%);
     --sidebar-ring: hsl(217.2 91.2% 59.8%);
     --sidebar: hsl(240 5.9% 10%);
+    --chat-accent: hsl(207 82% 64%);
+    --chat-canvas: hsl(210 24% 12%);
+    --chat-outgoing: hsl(207 52% 29%);
+    --chat-outgoing-foreground: hsl(210 40% 98%);
 }
 
 @layer base {

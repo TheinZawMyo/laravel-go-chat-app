@@ -3,6 +3,7 @@ import { createPinia } from 'pinia';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import ChatLayout from '@/layouts/ChatLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
@@ -14,6 +15,8 @@ void createInertiaApp({
         switch (true) {
             case name === 'Welcome':
                 return null;
+            case name === 'Chat':
+                return ChatLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):

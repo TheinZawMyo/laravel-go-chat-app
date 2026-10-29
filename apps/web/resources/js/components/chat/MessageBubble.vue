@@ -1,0 +1,267 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import {
+    MoreHorizontal,
+    Pencil,
+    Reply,
+    RotateCcw,
+    Trash2,
+    X,
+} from '@lucide/vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/composables/useAuth';
+import { useInitials } from '@/composables/useInitials';
+import { formatMessageTime } from '@/lib/format';
+import { ApiError } from '@/lib/http';
+import { useChatStore } from '@/stores/chat';
+import type { ChatMessage } from '@/types';
+
+const props = withDefaults(
+    defineProps<{
+        message: ChatMessage;
+        showSender?: boolean;
+    }>(),
+    {
+        showSender: false,
+    },
+);
+
+const chat = useChatStore();
+const { user } = useAuth();
+const { getInitials } = useInitials();
+
+const editing = ref(false);
+const draft = ref('');
+const saving = ref(false);
+const localError = ref<string | null>(null);
+
+const isOwn = computed(() => props.message.sender.id === user.value?.id);
+const isDeleted = computed(() => props.message.deleted_at !== null);
+
+function startEditing(): void {
+    draft.value = props.message.body ?? '';
+    localError.value = null;
+    editing.value = true;
+}
+
+function cancelEditing(): void {
+    editing.value = false;
+    draft.value = '';
+    localError.value = null;
+}
+
+async function saveEdit(): Promise<void> {
+    const body = draft.value.trim();
+
+    if (body === '' || saving.value) {
+        return;
+    }
+
+    saving.value = true;
+    localError.value = null;
+
+    try {
+        await chat.editMessage(props.message, body);
+        editing.value = false;
+    } catch (error) {
+        localError.value =
+            error instanceof ApiError
+                ? (error.errors.body?.[0] ?? error.message)
+                : 'Unable to edit this message.';
+    } finally {
+        saving.value = false;
+    }
+}
+
+async function remove(): Promise<void> {
+    if (
+        typeof window !== 'undefined' &&
+        !window.confirm('Delete this message?')
+    ) {
+        return;
+    }
+
+    localError.value = null;
+
+    try {
+        await chat.deleteMessage(props.message);
+    } catch (error) {
+        localError.value =
+            error instanceof ApiError
+                ? error.message
+                : 'Unable to delete this message.';
+    }
+}
+</script>
+
+<template>
+    <div
+        class="group flex w-full gap-2 px-3 py-1.5 sm:px-6 lg:px-8"
+        :class="isOwn ? 'flex-row-reverse' : ''"
+    >
+        <Avatar v-if="!isOwn" class="mt-1 size-8 shrink-0">
+            <AvatarImage
+                v-if="message.sender.avatar_url"
+                :src="message.sender.avatar_url"
+                :alt="message.sender.name"
+            />
+            <AvatarFallback>{{
+                getInitials(message.sender.name)
+            }}</AvatarFallback>
+        </Avatar>
+
+        <div
+            class="flex max-w-[min(82%,42rem)] min-w-0 flex-col"
+            :class="isOwn ? 'items-end' : 'items-start'"
+        >
+            <div
+                class="mb-1 flex items-center gap-2 px-1 text-[11px] text-muted-foreground"
+            >
+                <span v-if="showSender && !isOwn" class="font-medium">
+                    {{ message.sender.name }}
+                </span>
+                <span>{{ formatMessageTime(message.created_at) }}</span>
+                <span v-if="message.edited_at !== null" class="italic"
+                    >edited</span
+                >
+            </div>
+
+            <div
+                class="rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ring-1 ring-black/5 dark:ring-white/5"
+                :class="
+                    isOwn
+                        ? 'rounded-br-md bg-chat-outgoing text-chat-outgoing-foreground'
+                        : 'rounded-bl-md bg-background text-foreground'
+                "
+            >
+                <div
+                    v-if="message.reply_to !== null"
+                    class="mb-1.5 rounded-md border-l-2 px-2 py-1 text-xs opacity-80"
+                    :class="
+                        isOwn
+                            ? 'border-chat-outgoing-foreground/40 bg-chat-outgoing-foreground/10'
+                            : 'border-chat-accent/50 bg-chat-accent/5'
+                    "
+                >
+                    <div class="font-medium">
+                        {{ message.reply_to.sender.name }}
+                    </div>
+                    <div class="line-clamp-2 break-words whitespace-pre-wrap">
+                        {{
+                            message.reply_to.deleted_at !== null
+                                ? 'Message deleted'
+                                : message.reply_to.body
+                        }}
+                    </div>
+                </div>
+
+                <p v-if="isDeleted" class="italic opacity-70">
+                    This message was deleted.
+                </p>
+
+                <form
+                    v-else-if="editing"
+                    class="w-[min(70vw,26rem)] space-y-2"
+                    @submit.prevent="saveEdit"
+                >
+                    <Textarea
+                        v-model="draft"
+                        v-focus
+                        class="min-h-16 resize-none bg-background text-foreground"
+                        @keydown.esc="cancelEditing"
+                    />
+                    <div class="flex justify-end gap-1.5">
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            class="text-foreground hover:bg-background/20"
+                            @click="cancelEditing"
+                        >
+                            <X />
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            size="sm"
+                            :disabled="saving || draft.trim() === ''"
+                        >
+                            Save
+                        </Button>
+                    </div>
+                </form>
+
+                <p v-else class="break-words whitespace-pre-wrap">
+                    {{ message.body }}
+                </p>
+            </div>
+
+            <div
+                v-if="isOwn && !isDeleted && !editing"
+                class="mt-0.5 flex min-h-4 items-center gap-2 px-1 text-[11px] text-muted-foreground"
+            >
+                <span v-if="message.status === 'sending'">Sending…</span>
+                <button
+                    v-else-if="message.status === 'failed'"
+                    type="button"
+                    class="inline-flex items-center gap-1 text-destructive hover:underline"
+                    @click="chat.retryMessage(message)"
+                >
+                    <RotateCcw class="size-3" />
+                    Failed to send — retry
+                </button>
+            </div>
+
+            <p
+                v-if="localError !== null"
+                class="mt-1 max-w-xs px-1 text-[11px] text-destructive"
+            >
+                {{ localError }}
+            </p>
+        </div>
+
+        <div
+            v-if="!isDeleted && !editing && message.status !== 'sending'"
+            class="self-center opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="Message actions"
+                    >
+                        <MoreHorizontal />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem @select="chat.setReplyTo(message)">
+                        <Reply />
+                        Reply
+                    </DropdownMenuItem>
+                    <template v-if="isOwn">
+                        <DropdownMenuItem @select="startEditing">
+                            <Pencil />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            variant="destructive"
+                            @select="remove"
+                        >
+                            <Trash2 />
+                            Delete
+                        </DropdownMenuItem>
+                    </template>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
+    </div>
+</template>
