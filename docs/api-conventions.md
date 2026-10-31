@@ -76,6 +76,9 @@ Rules:
 - Clients reconnect with exponential backoff and jitter.
 - Subscriptions are reauthorized after reconnect and membership changes.
 - Clients recover missed messages through the Laravel API from their last confirmed `seq`.
+- The gateway closes a socket when its credential expires; clients renew in place with another `connection.authenticate` frame.
+- Typing and receipt frames require an existing subscription, and receipts must carry a positive `seq`.
+- The complete frame contract, limits, and close codes are documented in [`websocket-protocol.md`](websocket-protocol.md).
 
 ## Authorization conventions
 

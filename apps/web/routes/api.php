@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\ConversationController;
 use App\Http\Controllers\Api\V1\DeviceController;
+use App\Http\Controllers\Api\V1\GatewayTokenController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth'])->prefix('v1')->group(function () {
     Route::get('me', [MeController::class, 'show'])->name('api.v1.me');
+
+    Route::get('gateway/token', GatewayTokenController::class)->name('api.v1.gateway.token');
 
     Route::get('users/{username}', [UserController::class, 'show'])->name('api.v1.users.show');
 

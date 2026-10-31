@@ -64,6 +64,10 @@
     --color-chat-canvas: var(--chat-canvas);
     --color-chat-outgoing: var(--chat-outgoing);
     --color-chat-outgoing-foreground: var(--chat-outgoing-foreground);
+
+    --color-telegram-bg: var(--telegram-bg);
+    --color-telegram-panel: var(--telegram-panel);
+    --color-telegram-hover: var(--telegram-hover);
 }
 
 /*
@@ -105,7 +109,9 @@
                 color-mix(in srgb, var(--chat-accent) 4%, transparent) 0.8px,
                 transparent 0.8px
             );
-        background-size: auto, 22px 22px;
+        background-size:
+            auto,
+            22px 22px;
     }
 }
 
@@ -148,6 +154,9 @@
     --chat-canvas: hsl(204 28% 97%);
     --chat-outgoing: hsl(207 90% 93%);
     --chat-outgoing-foreground: hsl(207 75% 18%);
+    --telegram-bg: hsl(210 24% 92%);
+    --telegram-panel: hsl(0 0% 100%);
+    --telegram-hover: hsl(210 20% 96%);
 }
 
 .dark {
@@ -188,6 +197,9 @@
     --chat-canvas: hsl(210 24% 12%);
     --chat-outgoing: hsl(207 52% 29%);
     --chat-outgoing-foreground: hsl(210 40% 98%);
+    --telegram-bg: hsl(0 0% 9%);
+    --telegram-panel: hsl(0 0% 13%);
+    --telegram-hover: hsl(0 0% 17%);
 }
 
 @layer base {

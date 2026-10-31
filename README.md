@@ -2,7 +2,7 @@
 
 Messenger/Telegram-style chat application built as a Laravel modular monolith with a Vue 3 + Inertia frontend, a Go WebSocket gateway, and a Go worker.
 
-See [CHAT_APP_IMPLEMENTATION_PLAN.md](CHAT_APP_IMPLEMENTATION_PLAN.md) for the full roadmap and [docs/architecture.md](docs/architecture.md) for the service layout.
+See [CHAT_APP_IMPLEMENTATION_PLAN.md](CHAT_APP_IMPLEMENTATION_PLAN.md) for the full roadmap, [docs/architecture.md](docs/architecture.md) for the service layout, and [docs/websocket-protocol.md](docs/websocket-protocol.md) for the realtime contract.
 
 ## Stack
 

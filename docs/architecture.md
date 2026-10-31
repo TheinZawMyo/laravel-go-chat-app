@@ -47,6 +47,22 @@ Vue 3 + Inertia + Tailwind + Pinia
 7. Message history uses cursor pagination ordered by per-conversation `seq`.
 8. Durable delivery is at-least-once; clients deduplicate by `event_id`.
 
+The full WebSocket event and subscription contract lives in [`websocket-protocol.md`](websocket-protocol.md); the rationale for short lived renewable credentials, per-user caps, and inbound rate limiting is recorded in [`adr/0004-websocket-connection-hardening.md`](adr/0004-websocket-connection-hardening.md).
+
+## Gateway connection limits
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `GATEWAY_MAX_CONNECTIONS` | 10000 | Sockets per gateway instance |
+| `GATEWAY_MAX_CONNECTIONS_PER_USER` | 10 | Sockets per account; must not exceed the instance limit |
+| `GATEWAY_INBOUND_RATE_PER_SECOND` | 30 | Inbound frames per second per connection |
+| `GATEWAY_INBOUND_BURST` | 60 | Inbound burst allowance per connection |
+| `GATEWAY_MAX_SUBSCRIPTIONS` | 250 | Conversation subscriptions per connection |
+| `GATEWAY_MAX_FRAME_BYTES` | 65536 | Maximum inbound frame size |
+| `GATEWAY_OUTBOUND_BUFFER` | 128 | Outbound queue before a slow consumer is closed |
+
+`GATEWAY_TOKEN_TTL` in `apps/web` bounds how long a socket can live on a single credential; the gateway closes the socket at token expiry and expects an in-place `connection.authenticate` renewal.
+
 ## Health endpoints
 
 | Endpoint | Purpose |

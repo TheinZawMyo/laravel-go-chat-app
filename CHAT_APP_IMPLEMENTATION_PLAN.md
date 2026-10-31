@@ -218,41 +218,50 @@ Implement persistent connections and authenticated realtime delivery.
 
 ## Gateway
 
-- [ ] Choose and configure a maintained Go WebSocket library.
-- [ ] Implement `/healthz` and `/readyz`.
-- [ ] Implement connection authentication.
-- [ ] Validate allowed WebSocket origins.
-- [ ] Configure ping/pong or heartbeat handling.
-- [ ] Implement bounded inbound and outbound buffers.
-- [ ] Implement write deadlines and maximum frame/message sizes.
-- [ ] Implement graceful shutdown and connection draining.
-- [ ] Implement connection registry by user and gateway instance.
-- [ ] Implement authorized conversation subscriptions.
-- [ ] Implement event envelope versioning.
-- [ ] Implement slow-consumer handling.
-- [ ] Add structured logs and basic metrics.
+- [x] Choose and configure a maintained Go WebSocket library (`github.com/coder/websocket`).
+- [x] Implement `/healthz` and `/readyz`.
+- [x] Implement connection authentication.
+- [x] Validate allowed WebSocket origins.
+- [x] Configure ping/pong or heartbeat handling.
+- [x] Implement bounded inbound and outbound buffers.
+- [x] Implement write deadlines and maximum frame/message sizes.
+- [x] Implement graceful shutdown and connection draining.
+- [x] Implement connection registry by user and gateway instance.
+- [x] Implement authorized conversation subscriptions.
+- [x] Implement event envelope versioning.
+- [x] Implement slow-consumer handling.
+- [x] Add structured logs and basic metrics.
+- [x] Close sockets when the connection token expires and support in-place re-authentication.
+- [x] Enforce a per-user connection cap (`GATEWAY_MAX_CONNECTIONS_PER_USER`).
+- [x] Enforce a per-connection inbound frame rate limit (`GATEWAY_INBOUND_RATE_PER_SECOND`, `GATEWAY_INBOUND_BURST`).
+- [x] Cross-check broker subjects against the envelope conversation, and validate receipts (`seq > 0`, UUID `message_id`).
+- [x] Drain connections with close code `1001` on shutdown.
 
 ## Frontend
 
-- [ ] Create a reusable WebSocket composable/service.
-- [ ] Implement connection state.
-- [ ] Implement reconnect with exponential backoff and jitter.
-- [ ] Restore authorized subscriptions after reconnect.
-- [ ] Deduplicate events by stable event/message ID.
-- [ ] Reconcile live events with HTTP responses.
+- [x] Create a reusable WebSocket composable/service.
+- [x] Implement connection state.
+- [x] Implement reconnect with exponential backoff and jitter.
+- [x] Restore authorized subscriptions after reconnect.
+- [x] Deduplicate events by stable event/message ID.
+- [x] Reconcile live events with HTTP responses.
+- [x] Renew the gateway token before `connection_token_expires_at` and honour close codes.
+- [x] Normalize the configured gateway origin to the `/ws` endpoint.
+- [x] Respect `max_subscriptions` from `connection.ready`.
 
 ## Deliverables
 
 - Authenticated WebSocket Gateway.
 - Live connection status in the UI.
 - Versioned event protocol.
+- [Protocol contract](docs/websocket-protocol.md) and [hardening ADR](docs/adr/0004-websocket-connection-hardening.md).
 
 ## Completion Criteria
 
-- [ ] Invalid credentials and origins are rejected.
-- [ ] Gateway restarts do not permanently prevent clients from reconnecting.
-- [ ] Slow clients cannot cause unbounded memory growth.
-- [ ] Connection state and failures are observable.
+- [x] Invalid credentials and origins are rejected.
+- [x] Gateway restarts do not permanently prevent clients from reconnecting.
+- [x] Slow clients cannot cause unbounded memory growth.
+- [x] Connection state and failures are observable.
 
 ---
 

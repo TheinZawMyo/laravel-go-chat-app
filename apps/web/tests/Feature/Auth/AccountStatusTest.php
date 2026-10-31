@@ -32,7 +32,7 @@ class AccountStatusTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get(route('dashboard'))
+            ->get(route('chats.index'))
             ->assertRedirect(route('login'));
 
         $this->assertGuest();

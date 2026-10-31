@@ -16,10 +16,13 @@ defineProps<{
 
 defineOptions({
     layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
+        title: 'Create your account',
+        description: 'Join in a few seconds and start chatting.',
     },
 });
+
+const inputClass =
+    'h-11 rounded-xl border-transparent bg-muted/60 px-4 shadow-none transition-colors focus-visible:border-chat-accent/40 focus-visible:bg-background focus-visible:ring-chat-accent/20';
 </script>
 
 <template>
@@ -31,9 +34,9 @@ defineOptions({
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
     >
-        <div class="grid gap-6">
+        <div class="grid gap-5">
             <div class="grid gap-2">
-                <Label for="name">Name</Label>
+                <Label for="name" class="text-sm font-medium">Name</Label>
                 <Input
                     id="name"
                     type="text"
@@ -42,13 +45,16 @@ defineOptions({
                     :tabindex="1"
                     autocomplete="name"
                     name="name"
-                    placeholder="Full name"
+                    placeholder="Your full name"
+                    :class="inputClass"
                 />
                 <InputError :message="errors.name" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="username">Username</Label>
+                <Label for="username" class="text-sm font-medium"
+                    >Username</Label
+                >
                 <Input
                     id="username"
                     type="text"
@@ -57,6 +63,7 @@ defineOptions({
                     autocomplete="username"
                     name="username"
                     placeholder="your_username"
+                    :class="inputClass"
                 />
                 <p class="text-xs text-muted-foreground">
                     3-30 characters. Lowercase letters, numbers, dashes, and
@@ -66,7 +73,9 @@ defineOptions({
             </div>
 
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email" class="text-sm font-medium"
+                    >Email address</Label
+                >
                 <Input
                     id="email"
                     type="email"
@@ -75,41 +84,49 @@ defineOptions({
                     autocomplete="email"
                     name="email"
                     placeholder="email@example.com"
+                    :class="inputClass"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">Password</Label>
+                <Label for="password" class="text-sm font-medium"
+                    >Password</Label
+                >
                 <PasswordInput
                     id="password"
                     required
                     :tabindex="4"
                     autocomplete="new-password"
                     name="password"
-                    placeholder="Password"
+                    placeholder="Create a password"
                     :passwordrules="passwordRules"
+                    :class="inputClass"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+                <Label for="password_confirmation" class="text-sm font-medium"
+                    >Confirm password</Label
+                >
                 <PasswordInput
                     id="password_confirmation"
                     required
                     :tabindex="5"
                     autocomplete="new-password"
                     name="password_confirmation"
-                    placeholder="Confirm password"
+                    placeholder="Repeat your password"
                     :passwordrules="passwordRules"
+                    :class="inputClass"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
 
             <Button
                 type="submit"
-                class="mt-2 w-full"
+                size="lg"
+                class="h-11 w-full rounded-xl bg-chat-accent text-sm font-semibold text-white shadow-lg shadow-chat-accent/25 hover:bg-chat-accent/90"
                 tabindex="6"
                 :disabled="processing"
                 data-test="register-user-button"
@@ -119,14 +136,9 @@ defineOptions({
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
+        <p class="text-center text-sm text-muted-foreground">
             Already have an account?
-            <TextLink
-                :href="login()"
-                class="underline underline-offset-4"
-                :tabindex="7"
-                >Log in</TextLink
-            >
-        </div>
+            <TextLink :href="login()" :tabindex="7">Log in</TextLink>
+        </p>
     </Form>
 </template>

@@ -36,7 +36,7 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('chats.index', absolute: false));
 
         $this->assertDatabaseHas('users', [
             'name' => 'Test User',

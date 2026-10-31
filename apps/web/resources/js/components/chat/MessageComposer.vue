@@ -5,10 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useChatStore } from '@/stores/chat';
+import { useRealtimeStore } from '@/stores/realtime';
 
 const chat = useChatStore();
+const realtime = useRealtimeStore();
 
 const draft = ref('');
+
+function handleInput(): void {
+    if (chat.activeConversation === null) {
+        return;
+    }
+
+    if (draft.value.trim() === '') {
+        realtime.stopTyping(chat.activeConversation.id);
+
+        return;
+    }
+
+    realtime.signalTyping(chat.activeConversation.id);
+}
 
 async function submit(): Promise<void> {
     const body = draft.value.trim();
@@ -20,6 +36,7 @@ async function submit(): Promise<void> {
     const replyToId = chat.replyTo?.id ?? null;
     const reply = chat.replyTo;
 
+    realtime.stopTyping(chat.activeConversation.id);
     draft.value = '';
     chat.setReplyTo(null);
 
@@ -39,9 +56,7 @@ async function submit(): Promise<void> {
             v-if="chat.replyTo !== null"
             class="mx-auto mb-3 flex max-w-4xl items-start gap-2 rounded-xl border-l-2 border-chat-accent bg-background px-3 py-2.5 text-xs shadow-sm"
         >
-            <CornerUpLeft
-                class="mt-0.5 size-3.5 shrink-0 text-chat-accent"
-            />
+            <CornerUpLeft class="mt-0.5 size-3.5 shrink-0 text-chat-accent" />
             <div class="min-w-0 flex-1">
                 <div class="font-medium">
                     Replying to {{ chat.replyTo.sender.name }}
@@ -76,6 +91,11 @@ async function submit(): Promise<void> {
                     placeholder="Write a message…"
                     aria-label="Message"
                     class="max-h-40 min-h-10 flex-1 resize-none border-0 bg-transparent py-2.5 shadow-none focus-visible:border-0 focus-visible:ring-0"
+                    @input="handleInput"
+                    @blur="
+                        chat.activeConversation !== null &&
+                        realtime.stopTyping(chat.activeConversation.id)
+                    "
                     @keydown.enter.exact.prevent="submit"
                 />
             </div>

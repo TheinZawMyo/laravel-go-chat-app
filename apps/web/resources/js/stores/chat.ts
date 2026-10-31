@@ -190,6 +190,50 @@ export const useChatStore = defineStore('chat', () => {
         messages.value = sortMessages(messages.value);
     }
 
+    function applyRealtimeMessage(message: ChatMessage): void {
+        const conversation = conversations.value.find(
+            (current) => current.id === message.conversation_id,
+        );
+
+        if (conversation === undefined) {
+            void fetchConversations();
+
+            return;
+        }
+
+        const previousSeq = conversation.last_message?.seq ?? 0;
+        const isNewSeq = message.seq > previousSeq;
+
+        if (conversation.id === activeConversationId.value) {
+            upsertMessage(message);
+        }
+
+        if (
+            isNewSeq &&
+            message.conversation_id !== activeConversationId.value
+        ) {
+            conversation.unread_count += 1;
+        }
+
+        if (isNewSeq || conversation.last_message?.id === message.id) {
+            conversation.last_message = message;
+            conversation.next_message_seq = Math.max(
+                conversation.next_message_seq,
+                message.seq,
+            );
+            conversation.updated_at = message.updated_at;
+            conversations.value = sortConversations(conversations.value);
+        }
+
+        if (message.conversation_id === activeConversationId.value) {
+            const latest = messages.value.at(-1);
+
+            if (latest !== undefined) {
+                void markRead(latest.seq);
+            }
+        }
+    }
+
     function replaceUrl(path: string): void {
         if (typeof window !== 'undefined') {
             window.history.replaceState({}, '', path);
@@ -546,6 +590,7 @@ export const useChatStore = defineStore('chat', () => {
         setMessageStatus,
         upsertConversation,
         upsertMessage,
+        applyRealtimeMessage,
         touchConversation,
     };
 });

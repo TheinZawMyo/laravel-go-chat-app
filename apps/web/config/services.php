@@ -28,6 +28,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'gateway' => [
+        'url' => env('GATEWAY_URL', 'ws://localhost:8081'),
+        'token_secret' => env('GATEWAY_TOKEN_SECRET', 'gateway-dev-secret-change-me'),
+        'token_ttl' => (int) env('GATEWAY_TOKEN_TTL', 300),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

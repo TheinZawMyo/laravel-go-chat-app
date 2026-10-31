@@ -30,7 +30,7 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
           }
         : {}),
     onSuccess: (response) => {
-        router.visit(response.redirect ?? '/dashboard');
+        router.visit(response.redirect ?? '/chats');
     },
 });
 </script>
@@ -41,7 +41,7 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
             <Button
                 type="button"
                 variant="outline"
-                class="w-full"
+                class="h-11 w-full rounded-xl border-border/70 bg-transparent font-medium hover:bg-telegram-hover"
                 @click="verify"
                 :disabled="isLoading"
             >
@@ -64,7 +64,7 @@ const { verify, isLoading, error, isSupported } = usePasskeyVerify({
                 <Separator class="w-full" />
             </div>
             <div class="relative flex justify-center text-xs uppercase">
-                <span class="bg-background px-2 text-muted-foreground">
+                <span class="bg-telegram-panel px-2 text-muted-foreground">
                     {{ props.separator ?? 'Or continue with email' }}
                 </span>
             </div>

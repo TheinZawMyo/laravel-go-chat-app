@@ -300,6 +300,67 @@ describe('chat store', () => {
         );
     });
 
+    it('applies realtime messages and increments unread counts for inactive chats', () => {
+        const store = useChatStore();
+        const activeConversation = createConversation();
+
+        store.initialize({
+            conversations: [activeConversation],
+            activeConversation: null,
+            activeMessages: [],
+            activeHasMore: false,
+            activeNextCursor: null,
+        });
+
+        const incoming = message({
+            id: 'message-9',
+            seq: 9,
+            sender: other,
+            body: 'Live update',
+        });
+
+        store.applyRealtimeMessage(incoming);
+
+        expect(store.messages).toHaveLength(0);
+        expect(store.conversations[0]?.last_message?.id).toBe('message-9');
+        expect(store.conversations[0]?.unread_count).toBe(1);
+
+        store.applyRealtimeMessage(incoming);
+
+        expect(store.conversations[0]?.unread_count).toBe(1);
+    });
+
+    it('reconciles realtime messages with optimistic and HTTP messages', () => {
+        const store = useChatStore();
+        const activeConversation = createConversation();
+
+        store.initialize({
+            conversations: [activeConversation],
+            activeConversation,
+            activeMessages: [],
+            activeHasMore: false,
+            activeNextCursor: null,
+        });
+
+        const sent = message({
+            id: 'server-message',
+            client_message_id: 'client-reconcile',
+            seq: 1,
+            sender: user,
+            body: 'Hello',
+        });
+
+        store.applyRealtimeMessage(sent);
+        store.applyRealtimeMessage(sent);
+
+        expect(store.messages).toHaveLength(1);
+        expect(store.messages[0]?.id).toBe('server-message');
+        expect(store.messages[0]?.status).toBe('sent');
+        expect(store.activeConversation?.last_message?.id).toBe(
+            'server-message',
+        );
+    });
+
     it('opens a direct conversation through the API', async () => {
         const store = useChatStore();
 

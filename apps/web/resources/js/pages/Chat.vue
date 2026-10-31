@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { ChevronLeft, MessagesSquare, RefreshCw } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue';
+import ConnectionStatus from '@/components/chat/ConnectionStatus.vue';
 import ConversationList from '@/components/chat/ConversationList.vue';
 import MessageComposer from '@/components/chat/MessageComposer.vue';
 import MessageTimeline from '@/components/chat/MessageTimeline.vue';
@@ -12,6 +13,7 @@ import { useInitials } from '@/composables/useInitials';
 import { useAuth } from '@/composables/useAuth';
 import { conversationTitle } from '@/lib/format';
 import { useChatStore } from '@/stores/chat';
+import { useRealtimeStore } from '@/stores/realtime';
 import type { ChatPageProps } from '@/types';
 
 const props = defineProps<ChatPageProps>();
@@ -19,6 +21,7 @@ const props = defineProps<ChatPageProps>();
 useAuth();
 
 const chat = useChatStore();
+const realtime = useRealtimeStore();
 const { getInitials } = useInitials();
 
 chat.initialize({
@@ -29,8 +32,35 @@ chat.initialize({
     activeNextCursor: props.activeNextCursor,
 });
 
+watch(
+    () => chat.conversations.map((conversation) => conversation.id),
+    (conversationIds) => realtime.syncSubscriptions(conversationIds),
+    { immediate: true },
+);
+
+onMounted(() => realtime.start());
+onBeforeUnmount(() => realtime.stop());
+
 const title = computed(() => conversationTitle(chat.activeConversation));
 const showConversation = computed(() => chat.activeConversation !== null);
+const typingUsers = computed(() =>
+    chat.activeConversation === null
+        ? []
+        : realtime.typingUsers(chat.activeConversation.id),
+);
+const typingLabel = computed(() => {
+    if (typingUsers.value.length === 0) {
+        return null;
+    }
+
+    if (typingUsers.value.length === 1) {
+        const name = chat.activeConversation?.participant?.name ?? 'Someone';
+
+        return `${name} is typing…`;
+    }
+
+    return `${typingUsers.value.length} people are typing…`;
+});
 </script>
 
 <template>
@@ -79,16 +109,28 @@ const showConversation = computed(() => chat.activeConversation !== null);
                     </Avatar>
 
                     <div class="min-w-0 flex-1">
-                        <p class="truncate text-[15px] font-semibold tracking-tight">
+                        <p
+                            class="truncate text-[15px] font-semibold tracking-tight"
+                        >
                             {{ title }}
                         </p>
                         <p
-                            v-if="chat.activeConversation.participant !== null"
+                            v-if="typingLabel !== null"
+                            class="truncate text-xs font-medium text-chat-accent"
+                        >
+                            {{ typingLabel }}
+                        </p>
+                        <p
+                            v-else-if="
+                                chat.activeConversation.participant !== null
+                            "
                             class="truncate text-xs text-muted-foreground"
                         >
                             @{{ chat.activeConversation.participant.username }}
                         </p>
                     </div>
+
+                    <ConnectionStatus />
 
                     <Button
                         type="button"
@@ -113,17 +155,28 @@ const showConversation = computed(() => chat.activeConversation !== null);
                 v-else
                 class="flex h-full flex-col items-center justify-center px-6 text-center"
             >
-                <div class="relative mb-7 flex size-32 items-center justify-center">
-                    <div class="absolute inset-0 rounded-full bg-chat-accent/10" />
-                    <div class="absolute inset-3 rounded-full border border-chat-accent/15" />
-                    <div class="relative flex size-20 items-center justify-center rounded-3xl bg-chat-accent text-white shadow-xl shadow-chat-accent/25">
+                <div
+                    class="relative mb-7 flex size-32 items-center justify-center"
+                >
+                    <div
+                        class="absolute inset-0 rounded-full bg-chat-accent/10"
+                    />
+                    <div
+                        class="absolute inset-3 rounded-full border border-chat-accent/15"
+                    />
+                    <div
+                        class="relative flex size-20 items-center justify-center rounded-3xl bg-chat-accent text-white shadow-xl shadow-chat-accent/25"
+                    >
                         <MessagesSquare class="size-9" />
                     </div>
                 </div>
                 <div class="max-w-sm">
-                    <p class="text-xl font-semibold tracking-tight">Your conversations, in one place</p>
+                    <p class="text-xl font-semibold tracking-tight">
+                        Your conversations, in one place
+                    </p>
                     <p class="mt-2 text-sm leading-6 text-muted-foreground">
-                        Select a chat to pick up where you left off, or start a new conversation from the chat list.
+                        Select a chat to pick up where you left off, or start a
+                        new conversation from the chat list.
                     </p>
                 </div>
             </div>

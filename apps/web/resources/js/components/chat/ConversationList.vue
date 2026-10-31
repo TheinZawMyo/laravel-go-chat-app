@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { MessagesSquare, Search } from '@lucide/vue';
+import ConnectionStatus from '@/components/chat/ConnectionStatus.vue';
 import NewConversationDialog from '@/components/chat/NewConversationDialog.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +32,9 @@ const filter = ref<'all' | 'unread'>('all');
 
 const unreadConversationCount = computed(
     () =>
-        chat.conversations.filter((conversation) => conversation.unread_count > 0)
-            .length,
+        chat.conversations.filter(
+            (conversation) => conversation.unread_count > 0,
+        ).length,
 );
 
 const filteredConversations = computed(() => {
@@ -93,7 +95,7 @@ function open(conversation: Conversation): void {
                     <DropdownMenuTrigger as-child>
                         <button
                             type="button"
-                            class="rounded-full outline-none ring-offset-background transition-shadow focus-visible:ring-2 focus-visible:ring-chat-accent focus-visible:ring-offset-2"
+                            class="rounded-full ring-offset-background transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-chat-accent focus-visible:ring-offset-2"
                             aria-label="Account menu"
                         >
                             <Avatar class="size-10">
@@ -121,13 +123,18 @@ function open(conversation: Conversation): void {
                     <h2 class="truncate text-xl font-semibold tracking-tight">
                         Messages
                     </h2>
-                    <p class="text-xs text-muted-foreground">Your conversations</p>
+                    <p class="text-xs text-muted-foreground">
+                        Your conversations
+                    </p>
                 </div>
             </div>
-            <NewConversationDialog />
+            <div class="flex shrink-0 items-center gap-2">
+                <ConnectionStatus />
+                <NewConversationDialog />
+            </div>
         </header>
 
-        <div class="px-4 pb-3 pt-4 sm:px-5">
+        <div class="px-4 pt-4 pb-3 sm:px-5">
             <div class="relative">
                 <Search
                     class="pointer-events-none absolute top-1/2 left-3 size-[18px] -translate-y-1/2 text-muted-foreground"
@@ -144,7 +151,7 @@ function open(conversation: Conversation): void {
         <div class="flex shrink-0 items-center gap-2 px-4 pb-3 sm:px-5">
             <button
                 type="button"
-                class="rounded-full px-4 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chat-accent"
+                class="rounded-full px-4 py-2 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-chat-accent focus-visible:outline-none"
                 :class="
                     filter === 'all'
                         ? 'bg-chat-accent text-white shadow-sm'
@@ -157,7 +164,7 @@ function open(conversation: Conversation): void {
             </button>
             <button
                 type="button"
-                class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chat-accent"
+                class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-chat-accent focus-visible:outline-none"
                 :class="
                     filter === 'unread'
                         ? 'bg-chat-accent text-white shadow-sm'
@@ -181,7 +188,7 @@ function open(conversation: Conversation): void {
             </button>
         </div>
 
-        <div class="min-h-0 flex-1 overflow-y-auto px-2 pb-4 pt-1 sm:px-3">
+        <div class="min-h-0 flex-1 overflow-y-auto px-2 pt-1 pb-4 sm:px-3">
             <div
                 v-if="
                     chat.loadingConversations && chat.conversations.length === 0
@@ -226,7 +233,7 @@ function open(conversation: Conversation): void {
                                 ? 'Start a direct chat by username.'
                                 : filter === 'unread' && search === ''
                                   ? 'You’re all caught up.'
-                                : 'Try a different name or username.'
+                                  : 'Try a different name or username.'
                         }}
                     </p>
                 </div>
@@ -239,11 +246,12 @@ function open(conversation: Conversation): void {
                 >
                     <button
                         type="button"
-                        class="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-chat-accent/70 sm:gap-3.5 sm:px-3.5"
+                        class="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:ring-chat-accent/70 focus-visible:outline-none focus-visible:ring-inset sm:gap-3.5 sm:px-3.5"
                         :class="{
                             'bg-chat-accent text-white shadow-md shadow-chat-accent/15 hover:bg-chat-accent/95':
                                 chat.activeConversationId === conversation.id,
-                            'hover:bg-muted/80': chat.activeConversationId !== conversation.id,
+                            'hover:bg-muted/80':
+                                chat.activeConversationId !== conversation.id,
                         }"
                         :aria-current="
                             chat.activeConversationId === conversation.id
@@ -282,7 +290,8 @@ function open(conversation: Conversation): void {
                                 <span
                                     class="shrink-0 text-[11px]"
                                     :class="
-                                        chat.activeConversationId === conversation.id
+                                        chat.activeConversationId ===
+                                        conversation.id
                                             ? 'text-white/80'
                                             : conversation.unread_count > 0
                                               ? 'font-medium text-chat-accent'
@@ -304,7 +313,8 @@ function open(conversation: Conversation): void {
                                 <span
                                     class="truncate text-[13px]"
                                     :class="
-                                        chat.activeConversationId === conversation.id
+                                        chat.activeConversationId ===
+                                        conversation.id
                                             ? 'text-white/85'
                                             : conversation.unread_count > 0
                                               ? 'font-medium text-foreground'
@@ -317,7 +327,8 @@ function open(conversation: Conversation): void {
                                     v-if="conversation.unread_count > 0"
                                     class="h-5 min-w-5 shrink-0 justify-center rounded-full border-0 px-1.5 text-[10px] font-bold"
                                     :class="
-                                        chat.activeConversationId === conversation.id
+                                        chat.activeConversationId ===
+                                        conversation.id
                                             ? 'bg-white/20 text-white hover:bg-white/20'
                                             : 'bg-chat-accent text-white hover:bg-chat-accent'
                                     "

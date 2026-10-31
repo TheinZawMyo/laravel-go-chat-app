@@ -10,6 +10,13 @@ class LastSeenTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
+
     public function test_authenticated_requests_update_last_seen_at()
     {
         $user = User::factory()->create([
@@ -18,7 +25,7 @@ class LastSeenTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->get(route('dashboard'))
+            ->get(route('chats.index'))
             ->assertOk();
 
         $this->assertNotNull($user->refresh()->last_seen_at);

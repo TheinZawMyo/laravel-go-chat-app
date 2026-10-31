@@ -1,152 +1,199 @@
 <script setup lang="ts">
-import { Form, Head, usePage } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
+import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { edit } from '@/routes/profile';
+import { useInitials } from '@/composables/useInitials';
 import { send } from '@/routes/verification';
-
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Profile settings',
-                href: edit(),
-            },
-        ],
-    },
-});
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const { getInitials } = useInitials();
+
+const inputClass =
+    'h-11 rounded-xl border-transparent bg-muted/60 px-4 shadow-none transition-colors focus-visible:border-chat-accent/40 focus-visible:bg-background focus-visible:ring-chat-accent/20';
 </script>
 
 <template>
     <Head title="Profile settings" />
 
-    <h1 class="sr-only">Profile settings</h1>
-
-    <div class="flex flex-col space-y-6">
-        <Heading
-            variant="small"
-            title="Profile"
-            description="Update your name, username, and public profile"
-        />
-
-        <Form
-            v-bind="ProfileController.update.form()"
-            class="space-y-6"
-            v-slot="{ errors, processing }"
+    <div class="space-y-6">
+        <section
+            class="flex items-center gap-4 rounded-2xl border border-black/5 bg-telegram-panel p-5 shadow-sm dark:border-white/10"
         >
-            <div class="grid gap-2">
-                <Label for="name">Name</Label>
-                <Input
-                    id="name"
-                    class="mt-1 block w-full"
-                    name="name"
-                    :default-value="user.name"
-                    required
-                    autocomplete="name"
-                    placeholder="Full name"
+            <Avatar
+                class="size-16 ring-2 ring-chat-accent/20 ring-offset-2 ring-offset-telegram-panel"
+            >
+                <AvatarImage
+                    v-if="user.avatar_url"
+                    :src="user.avatar_url"
+                    :alt="user.name"
                 />
-                <InputError class="mt-2" :message="errors.name" />
-            </div>
+                <AvatarFallback
+                    class="bg-chat-accent text-lg font-semibold text-white"
+                >
+                    {{ getInitials(user.name) }}
+                </AvatarFallback>
+            </Avatar>
 
-            <div class="grid gap-2">
-                <Label for="username">Username</Label>
-                <Input
-                    id="username"
-                    class="mt-1 block w-full"
-                    name="username"
-                    :default-value="user.username"
-                    required
-                    autocomplete="username"
-                    placeholder="your_username"
-                />
-                <p class="text-xs text-muted-foreground">
-                    3-30 characters. Lowercase letters, numbers, dashes, and
-                    underscores.
+            <div class="min-w-0">
+                <p class="truncate text-lg font-semibold tracking-tight">
+                    {{ user.name }}
                 </p>
-                <InputError class="mt-2" :message="errors.username" />
+                <p class="truncate text-sm text-muted-foreground">
+                    @{{ user.username }}
+                </p>
+                <p
+                    v-if="user.status_text"
+                    class="mt-1 truncate text-xs text-chat-accent"
+                >
+                    {{ user.status_text }}
+                </p>
             </div>
+        </section>
 
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    name="email"
-                    :default-value="user.email"
-                    required
-                    autocomplete="username"
-                    placeholder="Email address"
-                />
-                <InputError class="mt-2" :message="errors.email" />
-            </div>
+        <section
+            class="rounded-2xl border border-black/5 bg-telegram-panel p-5 shadow-sm sm:p-6 dark:border-white/10"
+        >
+            <Heading
+                variant="small"
+                title="Profile"
+                description="Update your name, username, and public profile"
+            />
 
-            <div class="grid gap-2">
-                <Label for="status_text">Status</Label>
-                <Input
-                    id="status_text"
-                    class="mt-1 block w-full"
-                    name="status_text"
-                    :default-value="user.status_text ?? ''"
-                    autocomplete="off"
-                    placeholder="Available"
-                    maxlength="100"
-                />
-                <InputError class="mt-2" :message="errors.status_text" />
-            </div>
+            <Form
+                v-bind="ProfileController.update.form()"
+                class="mt-5 space-y-5"
+                v-slot="{ errors, processing }"
+            >
+                <div class="grid gap-2">
+                    <Label for="name" class="text-sm font-medium">Name</Label>
+                    <Input
+                        id="name"
+                        name="name"
+                        :default-value="user.name"
+                        required
+                        autocomplete="name"
+                        placeholder="Full name"
+                        :class="inputClass"
+                    />
+                    <InputError :message="errors.name" />
+                </div>
 
-            <div class="grid gap-2">
-                <Label for="bio">Bio</Label>
-                <Textarea
-                    id="bio"
-                    class="mt-1 block w-full"
-                    name="bio"
-                    :default-value="user.bio ?? ''"
-                    placeholder="Tell people a little about yourself"
-                    rows="4"
-                    maxlength="500"
-                />
-                <InputError class="mt-2" :message="errors.bio" />
-            </div>
+                <div class="grid gap-2">
+                    <Label for="username" class="text-sm font-medium"
+                        >Username</Label
+                    >
+                    <Input
+                        id="username"
+                        name="username"
+                        :default-value="user.username"
+                        required
+                        autocomplete="username"
+                        placeholder="your_username"
+                        :class="inputClass"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                        3-30 characters. Lowercase letters, numbers, dashes, and
+                        underscores.
+                    </p>
+                    <InputError :message="errors.username" />
+                </div>
 
-            <div v-if="page.props.mustVerifyEmail && !user.email_verified_at">
-                <p class="-mt-4 text-sm text-muted-foreground">
+                <div class="grid gap-2">
+                    <Label for="email" class="text-sm font-medium"
+                        >Email address</Label
+                    >
+                    <Input
+                        id="email"
+                        type="email"
+                        name="email"
+                        :default-value="user.email"
+                        required
+                        autocomplete="username"
+                        placeholder="Email address"
+                        :class="inputClass"
+                    />
+                    <InputError :message="errors.email" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="status_text" class="text-sm font-medium"
+                        >Status</Label
+                    >
+                    <Input
+                        id="status_text"
+                        name="status_text"
+                        :default-value="user.status_text ?? ''"
+                        autocomplete="off"
+                        placeholder="Available"
+                        maxlength="100"
+                        :class="inputClass"
+                    />
+                    <InputError :message="errors.status_text" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="bio" class="text-sm font-medium">Bio</Label>
+                    <Textarea
+                        id="bio"
+                        name="bio"
+                        :default-value="user.bio ?? ''"
+                        placeholder="Tell people a little about yourself"
+                        rows="4"
+                        maxlength="500"
+                        class="rounded-xl border-transparent bg-muted/60 px-4 py-3 shadow-none focus-visible:border-chat-accent/40 focus-visible:bg-background focus-visible:ring-chat-accent/20"
+                    />
+                    <InputError :message="errors.bio" />
+                </div>
+
+                <div
+                    v-if="page.props.mustVerifyEmail && !user.email_verified_at"
+                    class="rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300"
+                >
                     Your email address is unverified.
                     <Link
                         :href="send()"
                         as="button"
-                        class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                        class="font-medium underline underline-offset-4 hover:text-amber-900 dark:hover:text-amber-100"
                     >
                         Click here to re-send the verification email.
                     </Link>
-                </p>
+
+                    <p
+                        v-if="page.props.status === 'verification-link-sent'"
+                        class="mt-2 font-medium"
+                    >
+                        A new verification link has been sent to your email
+                        address.
+                    </p>
+                </div>
 
                 <div
-                    v-if="page.props.status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
+                    class="flex items-center justify-end border-t border-black/5 pt-5 dark:border-white/10"
                 >
-                    A new verification link has been sent to your email address.
+                    <Button
+                        :disabled="processing"
+                        class="h-10 rounded-xl bg-chat-accent px-6 font-semibold text-white shadow-md shadow-chat-accent/20 hover:bg-chat-accent/90"
+                        data-test="update-profile-button"
+                    >
+                        Save changes
+                    </Button>
                 </div>
-            </div>
+            </Form>
+        </section>
 
-            <div class="flex items-center gap-4">
-                <Button :disabled="processing" data-test="update-profile-button"
-                    >Save</Button
-                >
-            </div>
-        </Form>
+        <section
+            class="rounded-2xl border border-black/5 bg-telegram-panel p-5 shadow-sm sm:p-6 dark:border-white/10"
+        >
+            <DeleteUser />
+        </section>
     </div>
-
-    <DeleteUser />
 </template>
